@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <script>
+        /**
+         * 
+         * 代理模式：为其他对象提供一个代理，用来控制对这个对象的访问
+         *          你要做一件事情，直接做完了                          --- 没用代理
+         *          你要做一件时间，让朋友来帮你做，住完了了就被结果给你   --- 用代理
+         *          如果你自己就能做的事情就没必要用代理，叫别人做了
+         *          如果这件事有些东西你的专业，确实你朋友的强项，那么用代理才能得到更好的结果
+         * 
+         * 对于程序，面向对象设计的原则——单一职责原则，如果把朋友这个对象的能里也让学会，自己要做的事情就太多了
+         * 
+         */
+
+        var myImage = (function () {
+            // 创建一个本体对象
+            var imgNode = document.createElement('img');
+            document.body.appendChild(imgNode);
+
+            return {
+                setSrc: function (src) {
+                    imgNode.src = src;
+                }
+            }
+        })();
+        // 1、自己是可以把图片加载到页面上的，但是图片没加载完成时，这个对象自己做不到展示缩略图的效果 
+        // myImage.setSrc('http://picsum.photos/100/200');
+
+        var proxyImage = (function () {
+            var img = new Image;
+            console.log(this, 22);
+
+            img.onload = function () {
+                // 4、等待大图片加载完成，再去做创建
+                myImage.setSrc(this.src);
+            }
+            return {
+                setSrc: function (src) {
+                    // 3、这边可以先给image设置个本地图片
+                    myImage.setSrc('file:// /C:/Users/svenzeng/Desktop/loading.gif');
+                    img.src = src;
+                }
+            }
+        })();
+
+        // 2、propxyImage 有能力先展示缩略图，所已通过 proxyImage 创建
+        proxyImage.setSrc('http://picsum.photos/100/200');
+    </script>
+</body>
+
+</html>

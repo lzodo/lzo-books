@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="./ajax.js"></script>
+</head>
+
+<body>
+
+</body>
+<script>
+    let r = fetch('http://localhost:8778/extend/formText?a=1');
+    console.log(r); // Promise <pending> 所以可以使用await或then
+
+    fetch('http://localhost:8778/extend/formText?a=1').then((res) => {
+        // 1.获取到res，是一个流，获取具体的结果，如果是json数据，就用json()
+        console.log(res.status); // 响应状态码，服务器错误会走，then的第二个回调
+        return res.text();
+    }).then(data => {
+        console.log(data, 'data');
+    })
+
+    // 参数
+    async function getData() {
+        const formData = new FormData();
+        formData.append("name", "lzo");
+        formData.append("age", 18);
+        const response = await fetch("http://localhost:8778/extend/formText", {
+            method: "post",
+            body: formData,
+        });
+
+        // 获取response状态，ok == 200-299
+        console.log(response.ok, response.status, response.statusText);
+        const res = await response.text();
+        console.log("res:", res);
+    }
+    getData();
+</script>
+
+</html>

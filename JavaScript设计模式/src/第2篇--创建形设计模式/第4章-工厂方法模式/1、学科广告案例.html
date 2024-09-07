@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <div id="container"></div>
+    <script>
+        // 给不同学科添加广告位
+        var Java = function (content) {
+            // 传入内容
+            this.content = content;
+            (function (content) {
+                // 学科固定样式的广告位
+                var div = document.createElement('div');
+                div.innerHTML = content;
+                div.style.color = 'green'
+                document.getElementById('container').appendChild(div)
+            })(content)
+        }
+
+        var PhP = function (content) {
+            // 传入内容
+            this.content = content;
+            (function (content) {
+                // 学科固定样式的广告位
+                var div = document.createElement('div');
+                div.innerHTML = content;
+                div.style.color = 'yellow'
+                div.style.background = 'red'
+                document.getElementById('container').appendChild(div)
+            })(content)
+        }
+
+        var JavaScript = function (content) {
+            // 传入内容
+            this.content = content;
+            (function (content) {
+                // 学科固定样式的广告位
+                var div = document.createElement('div');
+                div.innerHTML = content;
+                div.style.color = 'pink'
+                document.getElementById('container').appendChild(div)
+            })(content)
+        }
+
+
+        function JobFactory(type, content) {
+            switch (type) {
+                case 'java':
+                    return new Java(content)
+                case 'php':
+                    return new PhP(content)
+                case 'javascript':
+                    return new JavaScript(content)
+            }
+        }
+
+        JobFactory('java', 'java 内容')
+        JobFactory('php', 'php 内容')
+        JobFactory('javascript', 'javascript 内容')
+        JobFactory('javascript', '又一个javascript 内容 很多很多')
+        //! 暂时指设置三个类以后如果，不断添加新的学科不好维护
+    </script>
+</body>
+
+</html>

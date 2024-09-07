@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+
+<body>
+  <button id="btn">按钮</button>
+</body>
+<script>
+  var btn = document.querySelector('#btn')
+  /**
+   * 外观模式：就是封装，简化底层接口复杂性
+   *          addEvent就是复杂的底层，使用的时候就是简化过的
+   *          兼容处理只是外观模式的一种，复杂问题封装起来，外部可以简单调用的都可以算
+   */
+
+  // 外光模式实现，例如兼容问题
+  function addEvent(dom, type, fn) {
+    // 如果可以使用DOM2事件
+    if (dom.addEventListener) {
+      dom.addEventListener(type, fn);
+      // 如果可以使用IE事件
+    } else if (dom.attachEvent) {
+      dom.attachEvent("on" + type, fn);
+      // 如果都不行就用DOM0事件程序
+    } else {
+      dom["on" + type] = fn;
+    }
+  }
+
+  // 使用
+  addEvent(btn, 'click', () => {
+    console.log('点击成功');
+  })
+  addEvent(btn, 'click', () => {
+    console.log('点击成功2');
+  })
+
+
+
+</script>
+
+</html>

@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    评论数目<span id="msg_num">0</span>
+    <ul id="msg"></ul>
+
+    <div>
+        <textarea name="" id="user_input" cols="30" rows="10"></textarea>
+        <button id="user_submit">提交</button>
+    </div>
+</body>
+<script src="./1、观察者模式.js"></script>
+<script>
+    console.log(Observe);
+    // 外观模式
+    function $(id) {
+        return document.getElementById(id);
+    }
+    // 工程师A  开发的模块
+    (function () {
+        // 追加一条消息
+        function addMsgItem(e) {
+            // e 是自己写那个fire方法中构建好的
+            var text = e.args.text, ul = $('msg'), li = document.createElement('li'), span = document.createElement('span');
+            li.innerHTML = text;
+            span.innerHTML = '删除'
+            // 关闭按钮
+            span.onclick = function () {
+                ul.removeChild(li);
+                Observe.fire('removeCommentMessage', { num: -1 })
+            }
+            // 添加删除按钮
+            li.appendChild(span)
+            // 添加留言节点
+            ul.appendChild(li)
+        }
+
+        // 注册，添加评论信息
+        Observe.regist('addCommentMessage', addMsgItem)
+    })(Observe);
+
+    // 工程师B 开发的模块
+    (function () {
+        // 更改用户消息数目
+        function changeMsgNum(e) {
+            var num = e.args.num;
+            $('msg_num').innerHTML = parseInt($('msg_num').innerHTML) + num
+        }
+        // 注册
+        Observe.regist('addCommentMessage', changeMsgNum)
+        Observe.regist('removeCommentMessage', changeMsgNum)
+    })();
+
+    // 工程师C 不需要更改前面其他人模块的代码，方法还可以写在原模块，他们在里面注册相应的消息，这边只要发布就行
+    (function () {
+        // 用户点击提交按钮
+        $('user_submit').onclick = function () {
+            // 获取用户输入框的信息
+            var text = $('user_input');
+            if (text.value === '') return
+            // 发布消息
+
+            Observe.fire('addCommentMessage', {
+                text: text.value,
+                num: 1
+            })
+        }
+    })()
+</script>
+
+</html>

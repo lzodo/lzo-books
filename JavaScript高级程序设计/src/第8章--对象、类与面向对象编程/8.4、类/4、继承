@@ -1,0 +1,22 @@
+class Vehicle {
+  constructor() {
+    this.hasEngine = true;
+  }
+  static identify() {
+    console.log("vehicle");
+  }
+}
+class Bus extends Vehicle {
+  constructor() {
+    // 不要在调用super()之前引用this，否则会抛出ReferenceError
+    super(); // 相当于super.constructor()
+    console.log(this instanceof Vehicle); // true
+    console.log(this); // Bus { hasEngine: true }
+  }
+
+  // 静态方法继承
+  static identify() {
+    super.identify();
+  }
+}
+new Bus();

@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.7.1/jquery.js"></script>
+</head>
+
+<body>
+    <input class="input" />
+    <input class="input" value="22" />
+    <div id="demo"></div>
+</body>
+<script src="./1、链模式.js"></script>
+<script>
+    console.log(A('#demo'));
+    console.log(A('.input').filter(22).css({ color: '#f00', background: '#00f' }));
+    // console.log($('.input'));
+    // console.log($('.input').length);
+    // $('.input').css({ color: '#f00' })
+
+</script>
+</body>
+
+</html>

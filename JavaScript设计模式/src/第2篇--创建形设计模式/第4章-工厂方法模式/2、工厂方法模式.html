@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <div id="container"></div>
+    <script>
+
+        var Factory = function (type, content) {
+            // 安全检测一下，外面就可以像普通哪有直接调用
+            if (this instanceof Factory) {
+                return new this[type](content)
+            } else {
+                return new Factory(type, content)
+            }
+        }
+
+        // 把原型当做一个工厂
+        Factory.prototype = {
+            Java: function (content) {
+                // 传入内容
+                this.content = content;
+                (function (content) {
+                    // 学科固定样式的广告位
+                    var div = document.createElement('div');
+                    div.innerHTML = content;
+                    div.style.color = 'green'
+                    document.getElementById('container').appendChild(div)
+                })(content)
+            },
+            PhP: function (content) {
+                // 传入内容
+                this.content = content;
+                (function (content) {
+                    // 学科固定样式的广告位
+                    var div = document.createElement('div');
+                    div.innerHTML = content;
+                    div.style.color = 'yellow'
+                    div.style.background = 'red'
+                    document.getElementById('container').appendChild(div)
+                })(content)
+            },
+            JavaScript: function (content) {
+                // 传入内容
+                this.content = content;
+                (function (content) {
+                    // 学科固定样式的广告位
+                    var div = document.createElement('div');
+                    div.innerHTML = content;
+                    div.style.color = 'pink'
+                    document.getElementById('container').appendChild(div)
+                })(content)
+            }
+        }
+
+        Factory('Java', 'java 内容')
+        Factory('PhP', 'php 内容')
+        Factory('JavaScript', 'javascript 内容')
+        Factory('JavaScript', '又一个javascript 内容 很多很多')
+
+
+
+
+    </script>
+</body>
+
+</html>

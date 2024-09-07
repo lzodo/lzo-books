@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <script>
+        /**
+         * 
+         * 通过img的src属性向其他服务器发送请求（只适用get，而且是单向的）
+         * 案例：图片预加载
+         * https://fastly.picsum.photos/id/618/200/300.jpg
+         */
+
+        // var Count = (function () {
+        //     // 缓存图片
+        //     var img = new Image();
+        //     // 返回统计函数
+        //     return function (params) {
+        //         // 统计请求字符串
+        //         var str = "http://www.count.com/a.gif?";
+        //         for (var i in params) {
+        //             str += `${i}=${params[i]}`;
+        //         }
+        //         img.src = str;
+        //         return img;
+        //     };
+        // })();
+
+        var Count = (function () {
+            // 首先创建一个普通的本体对象，这个对象负责往页面中创建一个img标签
+            var img = new Image();
+            // 返回统计函数
+            return function (params) {
+                // 统计请求字符串
+                img.src = `http://picsum.photos/${params.w}/${params.h}`;
+                document.body.appendChild(img)
+            };
+        })();
+
+        // 外界调用这个接口，便可以给该img标签设置src属性
+        Count({ w: 100, h: 200 });
+
+    </script>
+</body>
+
+</html>

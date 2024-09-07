@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+
+</head>
+
+<body>
+    <script>
+        /**
+         * 通过script标签获取远程文件，正常情况和img一样get请求也是单向的，获取到的内容是不变的
+         * 因此我们可以在src指向的url后面添加一下字段信息，服务器获取这些字段，再相应的生成对应内容（JSONP的实现原理）
+         * 
+         * function jsonpCallBack(res,req){}
+         * <script src="https://xxx.xx.cjs.js?callback=jsonpCallBack&data=getJsonData" />
+         * 
+         * 后端拿到请求，获取前端传过去的callback,将callback拼接成函数执行字符串，并传入要响应的数据返回（风险）
+         * 这是因为浏览器在解析 HTML 时，一旦遇到 <script> 标签，它会立即执行其中的代码，所有返回的字符串会比直接执行
+         * 
+         * JSONP
+            extendRouter.get('/jsonp', (ctx, next) => {
+                let callback = ctx.query.callback;
+                let resData = JSON.stringify({ a: 123 });
+                ctx.body = `${callback}(${resData})`;
+            });
+         * 
+         */
+
+        function jsonpCallBack(res) {
+            console.log(res, 111); // { a: 123 },111
+        }
+        let script = document.createElement('script');
+        script.src = 'http://localhost:8778/extend/jsonp?callback=jsonpCallBack'
+        document.body.appendChild(script)
+
+
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <div id="print">fdsafas</div>
+</body>
+<script>
+    // (function anonymous(
+    // ) {
+    //     debugger
+    // })
+
+    setInterval(startDebug, 100); // 举个例子而已，很多网站并不是这么实现的
+    function startDebug() { debugger; };
+    // window.print()
+    window.onbeforeprint = function (event) {
+        //将一些不需要打印的元素隐藏
+        console.log('onbeforeprint');
+    };
+    window.onafterprint = function (event) {
+        //放开隐藏的元素
+        console.log('onafterprint');
+
+    };
+
+</script>
+
+</html>

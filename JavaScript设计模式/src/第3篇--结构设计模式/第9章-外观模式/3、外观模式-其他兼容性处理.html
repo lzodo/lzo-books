@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+
+<body>
+  <button id="btn">按钮</button>
+</body>
+<script>
+  var btn = document.querySelector('#btn')
+
+  // 获取事件对象
+  var getEvent = function (event) {
+    // 标准下返回event，IE下返回window.event
+    return event || window.evnet
+  }
+
+  // 获取元素
+  var getTarget = function (event) {
+    var event = getEvent(event);
+    // 标准下返回event.target，IE下返回event.srcElement
+    return event.target || event.srcElement
+  }
+
+  // 阻止默认行为
+  var preventDefault = function (event) {
+    var event = getEvent(event);
+    // 标准浏览器
+    if (event.preventDefault) {
+      event.preventDefault();
+    } else {
+      event.returnValue = false
+    }
+  }
+
+  btn.onclick = function (e) {
+    // 阻止默认行为
+    preventDefault(e)
+    // 获取事件源目标对象
+    console.log(getTarget(e));
+
+  }
+
+
+
+</script>
+
+</html>
