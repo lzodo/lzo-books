@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+
+<body>
+
+</body>
+<script>
+  // 发送POST请求
+  // URL: 'https://example.com/analytics-reporting-url'
+  let data = {
+    foo: 'bar'
+  }
+  // 请求负载：'{foo: "bar"}'
+  navigator.sendBeacon(
+    "http://localhost:8778/extend/sendBeacon",
+    JSON.stringify(data))
+
+
+</script>
+
+</html>

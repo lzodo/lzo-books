@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+
+</body>
+<script>
+    // requestPermission授权方法返回一个期约，用户在授权对话框上执行操作后这个期约会解决。
+    // 没经过授权无法使用 Notification
+    Notification.requestPermission()
+        .then((permission) => {
+            // "granted" 值意味着用户明确授权了显示通知的权限。
+            // "denied" 值意味着用户明确拒绝了显示通知的权限。一旦拒绝，就无法通过编程方式挽回(要用户去浏览器设置)，因为不可能再触发授权提示。
+            console.log('User responded to permission request:', permission);
+        });
+
+    console.log(Notification.permission);
+    // 用户允许了，这边还要是https环境才能使用
+
+
+
+    new Notification('Title text! ');
+</script>
+
+</html>

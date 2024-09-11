@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <form id="myForm">
+        <input type="file" multiple>
+    </form>
+</body>
+<script>
+    let imageFormData = new FormData();
+    let imageInput = document.querySelector("input[type='file']");
+    imageInput.onchange = function () {
+        // for (let i of imageInput.files) {
+        //     imageInput.files[i]
+        //     imageFormData.append('files', imageInput.files[i]);
+        // }
+        for (let i = 0; i < imageInput.files.length; ++i) {
+            imageFormData.append('files', imageInput.files[i]);
+        }
+        fetch('http://localhost:8778/uploads/uploadFileTest', {
+            method: 'POST',
+            body: imageFormData
+        });
+    }
+
+
+
+</script>
+
+</html>

@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <input type="file" id="files-list">
+    <div id="progress"></div>
+    <div id="output"></div>
+</body>
+<script>
+    let filesList = document.getElementById("files-list");
+    filesList.addEventListener("change", (event) => {
+        let info = "",
+            output = document.getElementById("output"),
+            progress = document.getElementById("progress"),
+            files = event.target.files,
+            type = "default",
+            reader = new FileReader();
+        if (/image/.test(files[0].type)) {
+            // 读取文件并将内容的数据URI保存在result属性中
+            reader.readAsDataURL(files[0]);
+            type = "image";
+        } else {
+            // 从文件中读取纯文本内容并保存在result属性中
+            reader.readAsText(files[0]);
+            type = "text";
+        }
+        // 读取错误
+        reader.onerror = function () {
+            output.innerHTML = "Could not read file, error code is " +
+                reader.error.code;
+        };
+        // 读取进度
+        reader.onprogress = function (event) {
+            if (event.lengthComputable) {
+                progress.innerHTML = `${event.loaded}/${event.total}`;
+            }
+        };
+        reader.onload = function () {
+            let html = "";
+            switch (type) {
+                case "image":
+                    html = `<img src="${reader.result}">`;
+                    break;
+                case "text":
+                    html = reader.result;
+                    break;
+                default:
+                    html = ""
+
+            }
+            output.innerHTML = html;
+        };
+    });
+</script>
+
+</html>

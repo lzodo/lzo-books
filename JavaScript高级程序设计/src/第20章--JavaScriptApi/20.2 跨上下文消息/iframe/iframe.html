@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+</head>
+
+<body>
+    外部页面
+    <!-- src="http://localhost:8081/#/login" -->
+    <!--
+            let iframe = document.getElementById("iframe");
+
+            1.iframe引入一些网站需要关闭 高级 > 隐私设置和安全性 > 内容设置 > Cookie > 阻止第三方Cookie
+            2.引入不同源页面，无法正常操作子页面
+                跨域概念:协议与域名相同，就不算跨域
+                跨域顶多只能实现页面跳转window.location.href.
+                通过postMessage父子页面消息传递
+                    父页面（子）
+                        iframe.contentWindow.postMessage('要发送的数据'或{msg: 'data to parent'},'*');
+                        参数
+                            data：postMessage传递进来的值
+                            origin：发送消息的文档所在的域
+                            source：发送消息文档的window对象的代理
+                    子页面接收（父）
+                        window.addEventListener("message",(data)=>{console.log(data)}, false);
+            3.同源情况下父页面操作子页面，或获取子页面消息数据
+                子页面Win:iframe.contentWindow || window.frames['framesName']
+                子页面Docs:iframe.contentDocument.getElementById("xxxxx")
+            4.同源情况下子页面操作父页面，或获取父页面消息数据
+                子页面
+                    操作父页面:window.parent.ifrmLoaded('window.parent.ifrmLoaded');
+                    多层iframe最顶层:window.top
+                父页面接收
+                    function ifrmLoaded(data){
+                        console.log('接收子页面操作'+ data)
+                    }
+            5.iframe的事件操作
+                iframe.onload=()=>{}; //子页面加载完成后执行
+
+            6.iframe标签常用属性
+                iframe常用属性:
+                    1.frameborder:是否显示边框，1(yes),0(no)
+                    2.height:框架作为一个普通元素的高度，建议在使用css设置。
+                    3.width:框架作为一个普通元素的宽度，建议使用css设置。
+                    4.name:框架的名称，window.frames[name]时专用的属性。
+                    5.scrolling:框架的是否滚动。yes,no,auto。
+                    6.src：内框架的地址，可以使页面地址，也可以是图片的地址。
+                    7.sandbox: 对iframe进行一些列限制，IE10+支持
+                    8.allowfullscreen：是否允许全屏
+                    9.allowtransparency：是否允许设置透明
+            7.安全措施
+                防止自己网页被iframe
+                    1. 手动跳转
+                        if(window != window.top){
+                            window.top.location.href = correctURL;
+                        }
+                    或
+                        if (top.location.host != window.location.host) {
+                        　　top.location.href = window.location.href;
+                        }
+                    2.  响应头 X-Frame-Options
+                        X-Frame-Options是一个相应头，主要是描述服务器的网页资源的iframe权限。
+                            DENY：当前页面不能被嵌套iframe里，即便是在相同域名的页面中嵌套也不允许,也不允许网页中有嵌套iframe
+                            SAMEORIGIN：iframe页面的地址只能为同源域名下的页面
+                            ALLOW-FROM：可以在指定的origin url的iframe中加载
+                    3. 响应头 Content Security
+                        比较强大。。。。。
+                        Content-Security-Policy: default-src 'self'
+                        。。。各种配置
+                iframe别人网站
+                    1.sandbox
+                        是h5的一个新属性，就是用来给指定iframe设置一个沙盒模型，限制iframe的更多权限.
+                        allow-forms	允许进行提交表单
+                        allow-scripts	运行执行脚本
+                        allow-same-origin	允许同域请求,比如ajax,storage
+                        allow-top-navigation	允许iframe能够主导window.top进行页面跳转
+                        allow-popups	允许iframe中弹出新窗口,比如,window.open,target="_blank"
+                        allow-pointer-lock	在iframe中可以锁定鼠标，主要和鼠标锁定有关
+                        <iframe sandbox="allow-forms allow-same-origin" src="..."></iframe>
+
+
+                a 标签
+            -->
+    <iframe name="iframePage2" src="./iframeChild.html" style="background: #fff; width: 100%; height: 500px"
+        frameborder="0" id="insPage2"></iframe>
+</body>
+<script>
+    let iframe = document.getElementById("insPage2");
+    iframe.onload = function () {
+        // const iframeWin = iframe.contentWindow
+        // iframeWin.postMessage('初始化值', '*')
+
+        console.log(window.frames['iframePage2'] === iframe.contentWindow)
+        // setTimeout(()=>{
+        iframe.contentWindow.postMessage('MessageFromIndex1', '*');
+        // console.log(iframe.contentWindow)
+        // console.log(iframe.contentDocument.getElementById('submit'));
+        // console.log(iframe.contentDocument.getElementById('submit').click());
+        // },3000)
+
+        // data传递的参数   *写成子页面的域名或者是ip
+    }
+    function ifrmLoaded(data) {
+        console.log('接收子页面操作' + data)
+    }
+    window.addEventListener("message", (data) => { console.log(data) }, false);
+</script>
+
+</html>

@@ -794,6 +794,8 @@ console.log(target.foo);
 
 ### 9.1.6 实用反射 API
 
+作用就是调用对象的基本操作（内部方法）：Reflect.set(obj,“a”,1)
+
 1、
 
 反射（Reflect）
@@ -1332,16 +1334,21 @@ window.addEventListener("scroll", () => {
 let drawing = document.getElementById("drawing");
 // 确保浏览器支持<canvas>
 if (drawing.getContext) {
-  // 获取上下文，平面图就用2d
-  let context = drawing.getContext("2d");
-  // 其他代码。。。。
+    // 获取上下文，平面图就用2d
+    let context = drawing.getContext("2d");
+    // 其他代码。。。。
 
-  // 取得图像的数据URI
-  let imgURI = drawing.toDataURL("image/png");
-  // 显示图片
-  let image = document.createElement("img");
-  image.src = imgURI;
-  document.body.appendChild(image);
+    // 取得图像的数据URI
+    let imgURI = drawing.toDataURL("image/png");
+    // 显示图片
+    let image = document.createElement("img");
+    image.src = imgURI;
+    document.body.appendChild(image);
+ 
+    // 转二进制，并生成临时图片地址
+    drawing.toBlob((blob) => {
+        let url = URL.createObjectURL(blob) 
+    })
 }
 ```
 
@@ -1512,6 +1519,348 @@ if (drawing.getContext) {
 ```
 
 ......
+
+## 第 20 章 JavaScriptAPI
+
+### 20.2 跨上下文消息
+
+跨文档消息，有时候也简称为XDM，在不同执行上下文（如不同工作线程或不同源的页面）间传递信息的能力。
+
+- XDM的核心是postMessage( data, origin, source ) ，这个**方法名**工作者线程也有用到（目的是一样的）
+
+- 通过open关联的窗口
+
+  ```javascript
+  // 发送页面
+  let btn = document.querySelector('button')
+  btn.onclick = function () {
+      let subWindow = window.open('./subPage.html')
+      setTimeout(() => {
+          subWindow.postMessage("index page info", "http://127.0.0.1:5500");
+      }, 5000)
+  }
+  
+  window.addEventListener("message", (event) => {
+      // 接收返回数据
+      console.log("index.html", event.data);
+  });
+  
+  // subPage 页面
+  window.addEventListener("message", (event) => {
+      // 确保来自预期发送者
+      if (event.origin == "http://127.0.0.1:5500") {
+          // 对数据进行一些处理
+          console.log('subPage.html', event.data); 
+          // 可选：向来源窗口发送一条消息
+          event.source.postMessage("subPage 收到", "http://127.0.0.1:5500");
+      }
+  });
+  ```
+
+- 通过iframe关联的窗口
+
+  ```javascript
+  // 操作对象：iframe.contentWindow 
+  
+  // iframe内部页面
+  // window.parent.postMessage 主动发消息
+  // window.parent.ifrmLoaded() 调用父级方法
+  ```
+
+
+### 20.4 File API与Blob API
+
+- Web应用程序的一个主要的痛点是无法操作用户计算机上的文件。
+- 2000年前，处理的唯一方式通过 input type="file"
+- File API与Blob API是为了让Web开发者能以安全的方式访问客户端机器上的文件
+
+### 20.4.1 File类型
+
+HTML5在DOM上为文件输入元素添加了files集合，里面的元素是一个个的File对象
+
+File类型：
+
+- `name`：本地系统中的文件名。
+- `size`：以字节计的文件大小。
+- `type`：包含文件MIME类型的字符串。
+- `lastModifiedDate`：表示文件最后修改时间的字符串。这个属性只有Chome实现了。
+
+```javascript
+let filesList = document.getElementById("files-list");
+filesList.addEventListener("change", (event) => {
+    let files = event.target.files,
+        i = 0,
+        len = files.length;
+    while (i < len) {
+        const f = files[i];
+        console.log(`${f.name} (${f.type}, ${f.size} bytes)`);
+        i++;
+    }
+});
+```
+
+
+
+### 20.4.2 FileReader类型
+
+- 可以实际从文件中读取数据
+- FileReader类型表示一种异步文件读取机制，可以把FileReader想象成类似于XHR，只不过是用于从文件系统读取文件，而不是从服务器读取数据。
+
+**FileReader类型方法：**
+
+- readAsText(file, encoding)：从文件中读取纯文本内容并保存在result属性中。第二个参数表示编码，是可选的。
+- readAsDataURL(file)：读取文件并将内容的数据URI保存在result属性中。
+- readAsBinaryString(file)：读取文件并将每个字符的二进制数据保存在result属性中。
+- readAsArrayBuffer(file)：读取文件并将文件内容以ArrayBuffer形式保存在result属性。
+
+FileReader事件：
+
+- progress：用于跟踪和显示读取文件的进度
+- error：发生了错误
+- load：读取完成
+- loadend：不管实名情况最终都会触发（类似于trycatch的finally）
+
+```html
+<body>
+    <input type="file" id="files-list">
+    <div id="progress"></div>
+    <div id="output"></div>
+</body>
+<script>
+    let filesList = document.getElementById("files-list");
+    filesList.addEventListener("change", (event) => {
+        let info = "",
+            output = document.getElementById("output"),
+            progress = document.getElementById("progress"),
+            files = event.target.files,
+            type = "default",
+            reader = new FileReader();
+        if (/image/.test(files[0].type)) {
+            // 读取文件并将内容的数据URI保存在result属性中
+            reader.readAsDataURL(files[0]);
+            type = "image";
+        } else {
+            // 从文件中读取纯文本内容并保存在result属性中
+            reader.readAsText(files[0]);
+            type = "text";
+        }
+        // 读取错误
+        reader.onerror = function () {
+            output.innerHTML = "Could not read file, error code is " +
+                reader.error.code;
+        };
+        // 读取进度
+        reader.onprogress = function (event) {
+            if (event.lengthComputable) {
+                progress.innerHTML = `${event.loaded}/${event.total}`;
+            }
+        };
+        reader.onload = function () {
+            let html = "";
+            switch (type) {
+                case "image":
+                    html = `<img src="${reader.result}">`;
+                    break;
+                case "text":
+                    html = reader.result;
+                    break;
+                default:
+                    html = ""
+
+            }
+            output.innerHTML = html;
+        };
+    });
+</script>
+```
+
+### 20.4.3 FileReaderSync类型
+
+FileReaderSync类型就是FileReader的同步版本
+
+......
+
+### 20.4.4 Blob与部分读取
+
+某些情况下，可能需要读取部分文件而不是整个文件。为此，File对象提供了一个名为slice()的方法。
+
+**slice()** 方法接收两个参数：起始字节和要读取的字节数。这个方法返回一个Blob的实例，而Blob实际上是File的超类。
+
+blob表示二进制大对象（binary larget object），是JavaScript对不可修改二进制数据的封装类型。
+
+......
+
+### 20.4.5 对象URL与Blob
+
+**window.URL.createObjectURL()**
+
+- 对象URL有时候也称作Blob URL，是指引用存储在File或Blob中数据的URL
+- 对象URL的优点是不用把文件内容读取到JavaScript也可以使用文件。
+- 可以使用window.URL.createObjectURL()方法并传入File或Blob对象。这个函数返回的值是一个指向内存中地址的字符串
+
+
+
+......
+
+### 20.4.6 读取拖放文件
+
+###  20.7 Notifications API
+
+Notifications API用于向用户显示通知，通过触发通知可以在页面不活跃时向用户显示消息，看起来就像原生应用。
+
+使用条件：
+
+- 通知只能在运行在**安全上下文**的代码中被触发
+- 通知必须按照每个源的原则明确**得到用户允许**
+
+```javascript
+// requestPermission授权方法返回一个期约，用户在授权对话框上执行操作后这个期约会解决。
+// 没经过授权无法使用 Notification
+Notification.requestPermission()
+    .then((permission) => {
+    // "granted" 值意味着用户明确授权了显示通知的权限。
+    // "denied" 值意味着用户明确拒绝了显示通知的权限。一旦拒绝，就无法通过编程方式挽回(要用户去浏览器设置)，因为不可能再触发授权提示。
+    console.log('User responded to permission request:', permission);
+});
+
+console.log(Notification.permission);
+// 用户允许了，这边还要是https环境才能使用
+
+
+const n = new Notification('foo');
+n.onshow= () => console.log('Notification was shown!');
+n.onclick= () => console.log('Notification was clicked!');
+n.onclose= () => console.log('Notification was closed!');
+n.onerror= () => console.log('Notification experienced an error!');
+```
+
+
+
+## 第 23 章 JSON
+
+- JSON最关键的一点是要把它当成一种数据格式，而不是编程语言
+- JSON不属于JavaScript，它们只是拥有相同的语法而已。
+- JSON也不是只能在JavaScript中使用，它是一种通用数据格式。很多语言都有解析和序列化JSON的内置能力
+
+### 23.1 语法
+
+语法：
+
+- JSON字符串必须使用双引号，key也必须用双引号
+- 最后一项不需要逗号结尾
+- 末尾不需要封号
+
+JSON语法支持表示3种类型的值：
+
+- 简单值
+  - 字符串、数值、布尔值、null
+- 对象
+- 数组
+
+不支持：（JSON.stringify  结果中就会删除相应的键）
+
+- undefined
+- 函数
+
+### 23.2 解析与序列化
+
+JSON可以直接被解析成可用的JavaScript对象。与解析为DOM文档的XML相比，这个优势非常明显。
+
+### 23.2.1 JSON对象
+
+JSON对象有两个方法：stringify()和parse()
+
+```javascript
+let book = {
+    title: "Professional JavaScript",
+    authors: [
+        "Nicholas C. Zakas",
+        "Matt Frisbie"
+    ],
+    edition: 4,
+    year: 2017
+};
+let jsonText = JSON.stringify(book);
+let bookCopy = JSON.parse(jsonText);
+```
+
+### 23.2.2 序列化选项
+
+三个参数：
+
+- 第一个是操作对象
+
+- 第二个参数是过滤器，可以是数组或函数；
+
+  ```javascript
+  let book = {
+      title: "Professional JavaScript",
+      authors: [
+          "Nicholas C. Zakas",
+          "Matt Frisbie"
+      ],
+      edition: 4,
+      year: 2017
+  };
+  let jsonText = JSON.stringify(book, ["title", "edition"]); // {"title":"Professional JavaScript", "edition":4}
+  let jsonText = JSON.stringify(book, (key, value) => {
+        switch(key) {
+          case "authors":
+            return value.join(",")
+          case "year":
+            return 5000;
+          case "edition":
+            return undefined;
+          default:
+            return value;
+        }
+      }); //     {"title":"Professional JavaScript", "authors":"Nicholas C. Zakas, Matt Frisbie", "year":5000}
+  ```
+
+- 第三个参数是用于缩进结果JSON字符串的选项。(最多十个字符)
+
+  ```javascript
+  let jsonText = JSON.stringify(book, null, "--" );
+  
+  /*
+      {
+      --"title": "Professional JavaScript",
+      --"authors": [
+      ----"Nicholas C. Zakas",
+      ----"Matt Frisbie"
+      --],
+      --"edition": 4,
+      --"year": 2017
+      }
+  */
+  ```
+
+### 23.2.3 解析选项
+
+两个参数：
+
+- 第一个是操作对象
+
+- 第二个参数是过滤器，可以是数组或函数； （和stringify一样）
+
+  ```javascript
+  let book = {
+      title: "Professional JavaScript",
+      authors: [
+          "Nicholas C. Zakas",
+          "Matt Frisbie"
+      ],
+      edition: 4,
+      year: 2017,
+      releaseDate: new Date(2017, 11, 1)
+  };
+  let jsonText = JSON.stringify(book);
+  // 原函数返回undefined，则结果中就会删除相应的键
+  let bookCopy = JSON.parse(jsonText,(key, value) => key == "releaseDate" ? new Date(value) : value);
+  alert(bookCopy.releaseDate.getFullYear());
+  ```
+
+  
 
 ## 第 24 章 网络请求与远程资源
 
@@ -1800,3 +2149,139 @@ getData();
 ```
 
 ### 24.5.2 常见 Fetch 请求模式
+
+......
+
+
+
+### 附：扩展
+
+#### sse
+
+请求连接成功后，服务器可以主动向客户端推送消息
+
+- **技术实现**‌：SSE基于HTTP协议，利用了其长连接特性，通过浏览器向服务器发送一个HTTP请求，建立一条持久化的连接。
+- **数据格式与通信方向**‌：SSE可以传输文本和二进制格式的数据，但只支持**单向数据流**，即只能由服务器向客户端推送数据。
+- **连接状态与管理**‌：SSE的连接状态仅有三种：已连接、连接中、已断开。连接状态是**由浏览器自动维护的**，客户端无法手动关闭或重新打开连接。
+- **兼容性与安全性**‌：SSE是**标准的Web API**，可以在大部分现代浏览器和移动设备上使用。但如果需要兼容老版本的浏览器，则需要使用polyfill库进行兼容。
+  - SSE的**实现比较简单**，基于HTTP协议，与**普通的Web应用没有太大差异**，因此风险相对较低。
+- ‌**应用场景**‌：如果仅需服务器推送事件给客户端，并且应用在Web环境中，SSE是一个简单易用的选择。
+
+> SSE和WebSocket都有各自的优缺点，适用于不同的场景和需求。SSE因其简单易用、可靠性高和良好的兼容性，在需要服务器向客户端单向推送数据的场景中表现优异。而WebSocket则因其支持双向通信、低延迟和高并发性能，在需要实时性要求较高或需要客户端与服务器交互的应用中更为适用‌
+
+客户端
+
+```javascript
+let sse = null;
+document.addEventListener("keydown", (e) => {
+    if (e.keyCode == 13) {
+        // 按下回车键开始连接sse
+        // sse = new EventSource("http://localhost:8778/study/api/sse");
+        sse = new EventSource("http://192.168.203.132:8778/study/api/sse");
+        showStatus();
+
+        // sse 接收到消息
+        sse.addEventListener("res", (e) => {
+            console.log(e.data);
+        });
+
+        // 连接事件回调
+        sse.onopen = function (event) {
+            console.log("连接成功！", event);
+            showStatus();
+        };
+
+        // 连接错误事件回调
+        sse.onerror = function (event) {
+            console.log("发生错误：", event);
+        };
+
+        // 关闭
+        // setTimeout(() => {
+        //     sse.close();
+        //     showStatus();
+        // }, 5000);
+    }
+});
+function showStatus() {
+    // readyState 监听sse连接状态
+    if (sse.readyState === EventSource.CONNECTING) {
+        console.log("正在连接服务器...");
+    } else if (sse.readyState === EventSource.OPEN) {
+        console.log("已经连接上服务器！");
+    } else if (sse.readyState === EventSource.CLOSED) {
+        console.log("连接已经关闭。");
+    }
+}
+```
+
+服务端：
+
+```javascript
+// sse 请求
+const { PassThrough } = require('stream');
+studyRouter.get('/api/sse', async (ctx, next) => {
+	const stream = new PassThrough();
+	ctx.response.set('content-type', 'text/event-stream'); // SSE 通信核心代码
+	ctx.body = stream;
+	setInterval(() => {
+		stream.write(`event: res\n`); // 自定义客户端监听事件，可以定义多个，默认 message
+		stream.write(`data: ${new Date()}\n\n`);
+	}, 1000);
+});
+```
+
+#### sendBeacon
+
+> send bi肯，sendBeacon是一个浏览器提供的API，特别适用于在用户离开页面之前需要发送重要数据的情况，如统计分析、日志记录等。它的设计初衷是为了确保数据的可靠传输，即使在页面不再响应用户操作时也能完成数据的发送‌1。此外，sendBeacon的优先级较低，不会干扰其他高优先级的任务，如用户界面更新等，从而保证了数据的顺利发送‌
+
+```javascript
+// data 参数是将要发送的 ArrayBuffer、ArrayBufferView、Blob、DOMString、FormData 或 URLSearchParams 类型的数据。
+navigator.sendBeacon(url, data);
+```
+
+
+
+
+
+## 第 27 章 工作者线程
+
+### 27.1 工作者线程简介
+
+### 27.1.2 工作者线程的类型
+
+Web工作者线程规范中定义了三种主要的工作者线程：（现代浏览器都支持这些工作者线程）
+
+- 专用工作者线程：可以让脚本单独创建一个JavaScript线程，以执行委托的任务，只能被创建它的页面使用
+- 共享工作者线程：专用的基础上，还可以被多个不同的上下文使用，包括不同的页面。
+- 服务工作者线程：与专用共享完全不一样，它的主要用途是拦截、重定向和修改页面发出的请求，充当网络请求的仲裁者的角色。
+
+### 27.1.3 WorkerGlobalScope
+
+工作者线程内部，没有window的概念。这里的全局对象是WorkerGlobalScope的实例，通过**self**关键字暴露出来。
+
+- 专用工作者线程：DedicatedWorkerGlobalScope
+- 共享工作者线程：SharedWorkerGlobalScope
+- 服务工作者线程：ServiceWorkerGlobalScope
+
+各自的Global对象都是WorkerGlobalScope的子集
+
+### 27.2 专用工作者线程
+
+这个功能可以用来执行在页面线程之外的其他任务。主要用于**耗时计算**
+
+这样的线程可以与父页面交换信息、发送网络请求、执行文件输入/输出、进行密集计算、处理大量数据，以及实现其他不适合在页面执行线程里做的任务（否则会导致页面响应迟钝）。
+
+注意事项：
+
+- new Worker 里必须从网络引用同源文件
+
+- 不能使用DOM相关操作
+- 主线程的方法，DOM节点这些是无法通过postMessage传递到子线程的
+- 模块引入：
+  - importScripts("模块地址")  必须是网络地址，但是这边可以跨域，引入第三方CDN什么的（不支持ES6语法模块）
+  - 使用ES6，new Worker("地址",{type:"module"}) 需要配置一下，子线程就能通过 import 引入ES6模块了
+
+
+
+......books有案例

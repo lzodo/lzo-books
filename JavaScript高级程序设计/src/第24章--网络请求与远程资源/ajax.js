@@ -21,6 +21,8 @@ const ajax = function (opt) {
   //   if (option.contentType) {
   //     xhr.setRequestHeader("Content-Type", option.contentType);
   //   }
+  // 跨域允许使用cookie
+  xhr.withCredentials = true;
   xhr.send(option.data);
   xhr.onreadystatechange = function () {
     if (xhr.readyState == 4) {

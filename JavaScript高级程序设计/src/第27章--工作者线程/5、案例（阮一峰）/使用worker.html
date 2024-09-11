@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <script>
+        var worker1 = new Worker('./workers/worker1.js');
+        var worker2 = new Worker('./workers/worker2.js');
+        var worker3 = new Worker('./workers/worker3.js');
+        // 监听worker子线程的消息，过程中，主线程还是能正常做事情的做，不会阻塞主线程，等worker结果出来这边直接用就好
+        // 与异步不同的是，异步是将耗时计算加到队列任务中，缺点是等主线程执行完去轮询到时再开始计算（只是把耗时操作延后，提高用户体验，该消耗的时间还是会累加）
+        worker1.onmessage = e => {
+            console.log(e.data);
+        }
+        worker2.onmessage = e => {
+            console.log(e.data);
+        }
+        worker3.onmessage = e => {
+            console.log(e.data);
+        }
+
+        // 主动给子线程发消息（一般处理不是立马做的事情，当内部接收到我这里发的再开始做）
+        worker1.postMessage({ a: 1 })
+    </script>
+</body>
+
+</html>

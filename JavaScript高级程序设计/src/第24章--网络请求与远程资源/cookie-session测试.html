@@ -13,24 +13,22 @@
         <input name='test' value="123" />
         <input type="submit" value="Submit Form">
     </form>
+    <button>验证cookie</button>
 </body>
 <script>
     let form = document.querySelector('form')
     let data = new FormData(form);
     form.onsubmit = function (e) {
         e.preventDefault();
-        ajax({ method: 'post', url: 'http://localhost:8778/extend/formText', data: data })
+        ajax({ method: 'get', url: 'http://localhost:8778/tests/setSession', data: data })
+        ajax({ method: 'get', url: 'http://localhost:8778/tests/setCookie', data: data })
     }
 
-    let img = new Image();
-    img.onload = img.onerror = function (data) {
-        // 这样可以确保请求完成时无论什么响应都会收到通知。
-        console.log(data);
-    };
-    img.src = "http://localhost:8778/extend/formText?a=1";
+    let btn = document.querySelector('button');
+    btn.onclick = function () {
+        ajax({ method: 'get', url: 'http://localhost:8778/tests/getCookie' })
+    }
 
-
-    // contentType: "application/x-www-form-urlencoded"
 </script>
 
 </html>

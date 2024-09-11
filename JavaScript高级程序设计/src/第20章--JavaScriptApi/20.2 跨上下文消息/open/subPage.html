@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    子页面
+</body>
+<script>
+    window.addEventListener("message", (event) => {
+        // 确保来自预期发送者
+        if (event.origin == "http://127.0.0.1:5500") {
+            // 对数据进行一些处理
+            console.log('subPage.html', event.data);
+            // 可选：向来源窗口发送一条消息
+            event.source.postMessage("Received! 收到", "http://127.0.0.1:5500");
+        }
+    });
+</script>
+
+</html>

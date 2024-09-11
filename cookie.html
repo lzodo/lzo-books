@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
-    <script src="./ajax.js"></script>
+    <script src="./JavaScript高级程序设计/src/第24章--网络请求与远程资源/ajax.js"></script>
 </head>
 
 <body>
@@ -20,7 +20,10 @@
     form.onsubmit = function (e) {
         e.preventDefault();
         ajax({ method: 'post', url: 'http://localhost:8778/extend/formText', data: data })
+        ajax({ method: 'get', url: 'http://localhost:8778/tests/setSession', data: data })
+        ajax({ method: 'get', url: 'http://localhost:8778/tests/setCookie', data: data })
     }
+
 
     let img = new Image();
     img.onload = img.onerror = function (data) {
